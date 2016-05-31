@@ -4,14 +4,16 @@
 
 
 **Overview:**
+
 BIAS is a Teamspeak 3 administration and management suite, custom designed with Guild Wars 2 servers in mind.
 
 BIAS is intended to be a collection of PHP scripts and web pages that leverage the Guild Wars 2 API developed by ArenaNet LLC and the Teamspeak 3 serverquery feature to automate and make possible many tasks that were difficult or impossible to achieve normally.
 
 
 
-**Contributors**
-This software is currently being developed and maintained by me, Veypor (https://github.com/auVeypor). I can be contacted at veypor@veypor.net
+**Contributors:**
+
+- Veypor (https://github.com/auVeypor)(veypor@veypor.net)
 
 
 
