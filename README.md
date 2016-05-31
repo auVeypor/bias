@@ -13,7 +13,7 @@ BIAS is intended to be a collection of PHP scripts and web pages that leverage t
 
 **Contributors:**
 
-- Veypor (https://github.com/auVeypor)(veypor@veypor.net)
+- Veypor (https://github.com/auVeypor) (veypor@veypor.net)
 
 
 
