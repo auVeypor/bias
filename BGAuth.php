@@ -67,9 +67,9 @@ EOT;
 		$accName = $account->name;
 		$accUID = $account->id;
 		$tsName = $client->__toString();
+		$tsDbid = $client->client_database_id;
 		$world = $account->world;
 		$wvwRank = $account->wvw_rank;
-		//Notice: Undefined property: stdClass::$wvw_rank in /home/veyp/public_html/BGProj/BGAuth.php on line 69
 
 		$ipaddr = $_SERVER['REMOTE_ADDR'];
 	} catch (Exception $e) {
@@ -93,7 +93,7 @@ EOT;
 				exit("<br>Database Uplink Failed" . $DBConnection->connect_error);
 			}
 
-			$sqlINS = "INSERT INTO $tablename(accountname,accountuid,tsname,tsuid,serverid,worldrank,ip)VALUES('$accName','$accUID','$tsName','$tsuid','$world','$wvwRank','$ipaddr');";
+			$sqlINS = "INSERT INTO $tablename(accountname,accountuid,tsname,tsuid,tsdbid,serverid,worldrank,ip)VALUES('$accName','$accUID','$tsName','$tsuid','$tsDbid','$world','$wvwRank','$ipaddr');";
 			$sql1 = "SELECT * FROM $tablename WHERE accountuid = '$accUID';";
 			$sql2 = "SELECT * FROM $tablename WHERE tsuid = '$tsuid';";
 
@@ -109,7 +109,7 @@ EOT;
 			if ($result1->num_rows > 0) {
 				echo "This account has already verified a TS3 identity with the UID:<br>";
 				$row = $result1->fetch_assoc();
-				$oldUID = $row["tsuid"];
+				$oldDBID = $row["tsdbid"];
 				$oldRowID = $row["id"];
 				$sg = $ts3_server->serverGroupGetById(TSGROUP); // WORKING HERE, This script is broken, needs to remove clients by DBID from server, not group from client!
 				echo $row["tsuid"];
@@ -117,8 +117,8 @@ EOT;
 				$delSQL = "DELETE FROM $tablename WHERE id = '$oldRowID';";
 				if ($DBConnection->query($delSQL) === TRUE) {
 				    try {
-						$oldClient->remServerGroup(TSGROUP);
-						//$sg->clientDel($cldbid);
+				    	echo "Removing client " . $oldDBID . " from " . $sg->__toString();
+						$sg->clientDel($oldDBID);
 					} catch (TeamSpeak3_Exception $e) {
 						echo "Error removing the servergroup: " . $e->getCode() . ": " . $e->getMessage() . "<br>";
 					}
