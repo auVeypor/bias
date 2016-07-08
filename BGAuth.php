@@ -124,7 +124,7 @@ EOT;
 	}
 
 	if ($world == BGWID) {
-		if ($wvwRank < 35) {
+		if ($wvwRank < 50) {
 			$client = $ts3_server->clientGetByUid($tsuid);
 			echo "Apologies, but BIAS does not allow verification to accounts that have a WvW rank of 35 or less. Please reattempt verification with BIAS when you are higher level.<br>";
 			exit();
@@ -136,16 +136,9 @@ EOT;
 				exit();
 			}
 
-			$sqlINSERT = "INSERT INTO $tablename(accountname,accountuid,tsname,tsuid,tsdbid,serverid,worldrank,ip)VALUES('$accName','$accUID','$tsName','$tsuid','$tsDbid','$world','$wvwRank','$ipaddr');";
+			$sqlINSERT = "INSERT INTO $tablename(apikey,accountname,accountuid,tsname,tsuid,tsdbid,serverid,worldrank,ip)VALUES('$gw2key','$accName','$accUID','$tsName','$tsuid','$tsDbid','$world','$wvwRank','$ipaddr');";
 			$sqlSEARCHACCOUNT = "SELECT * FROM $tablename WHERE accountuid = '$accUID';";
 			$sqlSEARCHTSUID = "SELECT * FROM $tablename WHERE tsuid = '$tsuid';";
-
-			$result2 = $DBConnection->query($sqlSEARCHTSUID);
-			if ($result2->num_rows > 0) {
-				echo "This TS3 identity has already been verified.<br>";
-				echo "Please contact a staff member on <a href=\"http://gw2blackgate.com/\">our forums</a> if you are unable to access Teamspeak.<br>";
-				exit();
-			}
 			
 			$result1 = $DBConnection->query($sqlSEARCHACCOUNT);
 			if ($result1->num_rows > 0) {
@@ -153,7 +146,7 @@ EOT;
 				$row = $result1->fetch_assoc();
 				$oldDBID = $row["tsdbid"];
 				$oldRowID = $row["id"];
-				$sg = $ts3_server->serverGroupGetById(TSGROUP); // WORKING HERE, This script is broken, needs to remove clients by DBID from server, not group from client!
+				$sg = $ts3_server->serverGroupGetById(TSGROUP);
 				echo $row["tsuid"];
 				echo "<br>This identity will be deverified, and your new one verified.<br>";
 				$sqlDELETE = "DELETE FROM $tablename WHERE id = '$oldRowID';";
@@ -170,6 +163,13 @@ EOT;
 				    exit();
 				}
 				
+			}
+
+			$result2 = $DBConnection->query($sqlSEARCHTSUID);
+			if ($result2->num_rows > 0) {
+				echo "This TS3 identity has already been verified.<br>";
+				echo "Please contact a staff member on <a href=\"http://gw2blackgate.com/\">our forums</a> if you are unable to access Teamspeak.<br>";
+				exit();
 			}
 
 			if ($DBConnection->query($sqlINSERT) === TRUE) {

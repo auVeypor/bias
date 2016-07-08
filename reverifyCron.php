@@ -28,7 +28,7 @@
 	const BGWID = 1019;
 	const TSGROUP = 573;
 
-	function deverify($dbindex, $tsdbid, $ts3_server, $DBConnection) {	
+	function deverify($dbindex, $tsdbid, $ts3_server, $DBConnection, $tablename) {	
 		
 		$sqlDELETE = "DELETE FROM $tablename WHERE id = '$dbindex';";
 		if ($DBConnection->query($sqlDELETE) === TRUE) {
@@ -80,16 +80,16 @@
 		exit();
 	}
 
-	while($row = mysql_fetch_assoc($result))
+	while($row = $result->fetch_assoc())
 	{
 		$valid = true;
-		$key = $row['apikey'];
+		$gw2key = $row['apikey'];
 
 		if ($valid == true) {
 			try {
 				$account = $api->account($gw2key)->get();
 			} catch(Exception $e) {
-				deverify($row['id'],$row['tsdbid'],$ts3_server,$DBConnection);
+				deverify($row['id'],$row['tsdbid'],$ts3_server,$DBConnection,$tablename);
 				$valid = false;
 			}
 		}
@@ -97,7 +97,7 @@
 		if ($valid == true) {
 			$world = $account->world;
 			if ($world != BGWID) {
-				deverify($row['id'],$row['tsdbid'],$ts3_server,$DBConnection);
+				deverify($row['id'],$row['tsdbid'],$ts3_server,$DBConnection,$tablename);
 				$valid = false;
 			}
 		}
