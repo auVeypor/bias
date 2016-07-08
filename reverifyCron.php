@@ -2,8 +2,8 @@
 
 /*
  *
- *  Autoverification script for Teamspeak 3.
- *	Takes an account API key and uses GW2 API to verify server loyalty.
+ *  Sentry script designed to be cron'ed. Navigates the DB and makes sure all registrants are still on
+ *	the authorised server.
  *  
  *  This script uses the TS3 PHP framework: (https://docs.planetteamspeak.com/ts3/php/framework/)
  *  All credit to ScP for the framework.
@@ -11,8 +11,6 @@
  *	This script uses the very sexy GW2Treasure API wrapper, big props to them: (https://github.com/gw2treasures/gw2api)
  *
  *	Finally, this script uses the GW2 API, developed by ArenaNet LLC. (http://www.arena.net/)
- *
- *	Many thanks to the Blackgate server and in particular my friends from Knîghtmare [KnM] that made this possible.
  *
  *  Authored by Veypor (http://github.com/auVeypor) (veypor@veypor.net)
  */
