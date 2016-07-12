@@ -16,7 +16,7 @@
  */
 
 	include 'vendor/autoload.php';
-	require_once("../../auth.php");
+	require_once("../auth.php");
 	require_once("libraries/TeamSpeak3/TeamSpeak3.php");
 
 	ini_set('display_errors', 1);
@@ -25,8 +25,12 @@
 
 	const BGWID = 1019;
 	const TSGROUP = 573;
+	$today = date("Y-m-d");
 
-	function deverify($dbindex, $tsdbid, $ts3_server, $DBConnection, $tablename) {	
+	error_log("~~~ Begin BIAS Reverification Log for " . $today . ".\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
+	$startTime = microtime(true);
+
+	function deverify($dbindex, $tsdbid, $ts3_server, $DBConnection, $tablename, $today) {	
 		
 		$sqlDELETE = "DELETE FROM $tablename WHERE id = '$dbindex';";
 		if ($DBConnection->query($sqlDELETE) === TRUE) {
@@ -38,9 +42,10 @@
 						if ($i % 2 == 1) {
 							try {
 								$ts3_server->serverGroupClientDel($key, $tsdbid);
+								error_log("REMOVED: Servergroup " . $key . " from TSDBID: " . $tsdbid . "\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
 								$i++;
 							} catch (TeamSpeak3_Exception $e) {
-								echo "Error " . $e->getCode() . ": " . $e->getMessage();
+								error_log("ERROR: When removing group " . $key ." from user " . $tsdbid . ". Code: " . $e->getCode() . ": " . $e->getMessage() . "\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
 							}
 						} else {
 							$i++;
@@ -48,13 +53,17 @@
 					}
 				} 
 			} catch (TeamSpeak3_Exception $e) {
+				error_log("ERROR: TS3 server problems with deleting DBI: " . $dbindex . " TSDBID: " . $tsdbid . ". Code: " . $e->getCode() . ": " . $e->getMessage() . "\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
 				exit();
 			}
+		} else {
+			error_log("ERROR: Database connectivity problems when deleting DBI: " . $dbindex . " TSDBID: " . $tsdbid . "\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
 		}
 	}
 
 	$DBConnection = new mysqli($SQLHost, $SQLUser, $SQLPass, $SQLDBName);
 	if ($DBConnection->connect_error) {
+		error_log("ERROR: Database connectivity problems when forging connection.\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
 		exit();
 	}
 
@@ -63,18 +72,21 @@
 	try {
 		$result = $DBConnection->query($sqlGRAB);
 	} catch (Exception $e) {
+		error_log("ERROR: Database connectivity problems when fetching data.\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
 		exit();
 	}
 
 	try {
 		$api = new \GW2Treasures\GW2Api\GW2Api();
 	} catch (Exception $e) {
+		error_log("ERROR: Wrapper construction error.\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
 		exit();
 	}
 
 	try {
 		$ts3_server = TeamSpeak3::factory("serverquery://$TSUser:$TSPassword@$TSIP");
 	} catch (TeamSpeak3_Exception $e) {
+		error_log("ERROR: Forging TS3 connection. Code: " . $e->getCode() . ": " . $e->getMessage() . "\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
 		exit();
 	}
 
@@ -87,7 +99,8 @@
 			try {
 				$account = $api->account($gw2key)->get();
 			} catch(Exception $e) {
-				deverify($row['id'],$row['tsdbid'],$ts3_server,$DBConnection,$tablename);
+				error_log("INVALID KEY: User with TSDBID: " . $tsdbid . " has an invalid API key. Triggering deverification procedures. " . $tsdbid . "\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
+				deverify($row['id'],$row['tsdbid'],$ts3_server,$DBConnection,$tablename,$today);
 				$valid = false;
 			}
 		}
@@ -95,10 +108,14 @@
 		if ($valid == true) {
 			$world = $account->world;
 			if ($world != BGWID) {
-				deverify($row['id'],$row['tsdbid'],$ts3_server,$DBConnection,$tablename);
+				error_log("INVALID WORLD: User with TSDBID: " . $tsdbid . " is on unauthorised world " . $world . ". Triggering deverification procedures. " . $tsdbid . "\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
+				deverify($row['id'],$row['tsdbid'],$ts3_server,$DBConnection,$tablename,$today);
 				$valid = false;
 			}
 		}
 	}
+
+	$time_elapsed_secs = (microtime(true) - $startTime);
+	error_log("~~~ End BIAS Reverification Log for " . $today . ".\nToday's run took " . $time_elapsed_secs . " seconds to complete.\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
 
 ?>
