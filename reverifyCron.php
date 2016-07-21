@@ -16,7 +16,7 @@
  */
 
 	include 'vendor/autoload.php';
-	require_once("../auth.php");
+	include '../auth.php';
 	require_once("libraries/TeamSpeak3/TeamSpeak3.php");
 
 	ini_set('display_errors', 1);
@@ -30,10 +30,18 @@
 	error_log("~~~ Begin BIAS Reverification Log for " . $today . ".\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
 	$startTime = microtime(true);
 
-	function deverify($dbindex, $tsdbid, $ts3_server, $DBConnection, $tablename, $today) {	
-		
+	function deverify($dbindex, $tsdbid, $ts3_server, $tablename, $today) {	
+
+		include '../auth.php';
+		$DBConnection = new mysqli($SQLHost, $SQLUser, $SQLPass, $SQLDBName);
+		if ($DBConnection->connect_error) {
+			error_log("ERROR: Database connectivity problems when forging connection.\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
+			exit();
+		}
+
 		$sqlDELETE = "DELETE FROM $tablename WHERE id = '$dbindex';";
 		if ($DBConnection->query($sqlDELETE) === TRUE) {
+			mysqli_close($DBConnection);
 			try {
 				$groupList = $ts3_server->clientGetServerGroupsByDbid($tsdbid);
 				foreach ($groupList as $group) {
@@ -57,6 +65,7 @@
 				exit();
 			}
 		} else {
+			mysqli_close($DBConnection);
 			error_log("ERROR: Database connectivity problems when deleting DBI: " . $dbindex . " TSDBID: " . $tsdbid . "\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
 		}
 	}
@@ -71,6 +80,7 @@
 
 	try {
 		$result = $DBConnection->query($sqlGRAB);
+		mysqli_close($DBConnection);
 	} catch (Exception $e) {
 		error_log("ERROR: Database connectivity problems when fetching data.\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
 		exit();
@@ -101,7 +111,7 @@
 				$account = $api->account($gw2key)->get();
 			} catch(Exception $e) {
 				error_log("INVALID KEY: User with TSDBID: " . $tsdbid . " has an invalid API key. Triggering deverification procedures. " . $tsdbid . "\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
-				deverify($row['id'],$tsdbid,$ts3_server,$DBConnection,$tablename,$today);
+				deverify($row['id'],$tsdbid,$ts3_server,$tablename,$today);
 				$valid = false;
 			}
 		}
@@ -110,7 +120,7 @@
 			$world = $account->world;
 			if ($world != BGWID) {
 				error_log("INVALID WORLD: User with TSDBID: " . $tsdbid . " is on unauthorised world " . $world . ". Triggering deverification procedures. " . $tsdbid . "\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
-				deverify($row['id'],$tsdbid,$ts3_server,$DBConnection,$tablename,$today);
+				deverify($row['id'],$tsdbid,$ts3_server,$tablename,$today);
 				$valid = false;
 			}
 		}
