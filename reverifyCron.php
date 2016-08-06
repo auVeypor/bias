@@ -16,7 +16,7 @@
  */
 
 	include 'vendor/autoload.php';
-	include '../auth.php';
+	include '/home/veypor/auth.php';
 	require_once("libraries/TeamSpeak3/TeamSpeak3.php");
 
 	ini_set('display_errors', 1);
