@@ -126,7 +126,7 @@ EOT;
 	if ($world == BGWID) {
 		if ($wvwRank < 50) {
 			$client = $ts3_server->clientGetByUid($tsuid);
-			echo "Apologies, but BIAS does not allow verification to accounts that have a WvW rank of 35 or less. Please reattempt verification with BIAS when you are higher level.<br>";
+			echo "Apologies, but BIAS does not allow verification to accounts that have a WvW rank of 50 or less. Please reattempt verification with BIAS when you are higher level.<br>";
 			exit();
 		}
 		try {
