@@ -32,7 +32,7 @@
 
 	function deverify($dbindex, $tsdbid, $ts3_server, $tablename, $today) {	
 
-		include 'auth.php';
+		include '../../auth.php';
 		$DBConnection = new mysqli($SQLHost, $SQLUser, $SQLPass, $SQLDBName);
 		if ($DBConnection->connect_error) {
 			error_log("ERROR: Database connectivity problems when forging connection.\n", 3, "/home/veypor/logs/" . $today . ".log");
