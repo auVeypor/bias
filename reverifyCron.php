@@ -16,7 +16,7 @@
  */
 
 	include 'vendor/autoload.php';
-	include '/home/veypor/auth.php';
+	include '../../auth.php';
 	require_once("libraries/TeamSpeak3/TeamSpeak3.php");
 
 	ini_set('display_errors', 1);
@@ -27,15 +27,15 @@
 	const TSGROUP = 573;
 	$today = date("Y-m-d");
 
-	error_log("~~~ Begin BIAS Reverification Log for " . $today . ".\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
+	error_log("~~~ Begin BIAS Reverification Log for " . $today . ".\n", 3, "/home/veypor/logs/" . $today . ".log");
 	$startTime = microtime(true);
 
 	function deverify($dbindex, $tsdbid, $ts3_server, $tablename, $today) {	
 
-		include '../auth.php';
+		include 'auth.php';
 		$DBConnection = new mysqli($SQLHost, $SQLUser, $SQLPass, $SQLDBName);
 		if ($DBConnection->connect_error) {
-			error_log("ERROR: Database connectivity problems when forging connection.\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
+			error_log("ERROR: Database connectivity problems when forging connection.\n", 3, "/home/veypor/logs/" . $today . ".log");
 			exit();
 		}
 
@@ -50,10 +50,10 @@
 						if ($i % 2 == 1) {
 							try {
 								$ts3_server->serverGroupClientDel($key, $tsdbid);
-								error_log("REMOVED: Servergroup " . $key . " from TSDBID: " . $tsdbid . "\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
+								error_log("REMOVED: Servergroup " . $key . " from TSDBID: " . $tsdbid . "\n", 3, "/home/veypor/logs/" . $today . ".log");
 								$i++;
 							} catch (TeamSpeak3_Exception $e) {
-								error_log("ERROR: When removing group " . $key ." from user " . $tsdbid . ". Code: " . $e->getCode() . ": " . $e->getMessage() . "\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
+								error_log("ERROR: When removing group " . $key ." from user " . $tsdbid . ". Code: " . $e->getCode() . ": " . $e->getMessage() . "\n", 3, "/home/veypor/logs/" . $today . ".log");
 							}
 						} else {
 							$i++;
@@ -61,18 +61,18 @@
 					}
 				} 
 			} catch (TeamSpeak3_Exception $e) {
-				error_log("ERROR: TS3 server problems with deleting DBI: " . $dbindex . " TSDBID: " . $tsdbid . ". Code: " . $e->getCode() . ": " . $e->getMessage() . "\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
+				error_log("ERROR: TS3 server problems with deleting DBI: " . $dbindex . " TSDBID: " . $tsdbid . ". Code: " . $e->getCode() . ": " . $e->getMessage() . "\n", 3, "/home/veypor/logs/" . $today . ".log");
 				exit();
 			}
 		} else {
 			mysqli_close($DBConnection);
-			error_log("ERROR: Database connectivity problems when deleting DBI: " . $dbindex . " TSDBID: " . $tsdbid . "\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
+			error_log("ERROR: Database connectivity problems when deleting DBI: " . $dbindex . " TSDBID: " . $tsdbid . "\n", 3, "/home/veypor/logs/" . $today . ".log");
 		}
 	}
 
 	$DBConnection = new mysqli($SQLHost, $SQLUser, $SQLPass, $SQLDBName);
 	if ($DBConnection->connect_error) {
-		error_log("ERROR: Database connectivity problems when forging connection.\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
+		error_log("ERROR: Database connectivity problems when forging connection.\n", 3, "/home/veypor/logs/" . $today . ".log");
 		exit();
 	}
 
@@ -82,21 +82,21 @@
 		$result = $DBConnection->query($sqlGRAB);
 		mysqli_close($DBConnection);
 	} catch (Exception $e) {
-		error_log("ERROR: Database connectivity problems when fetching data.\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
+		error_log("ERROR: Database connectivity problems when fetching data.\n", 3, "/home/veypor/logs/" . $today . ".log");
 		exit();
 	}
 
 	try {
 		$api = new \GW2Treasures\GW2Api\GW2Api();
 	} catch (Exception $e) {
-		error_log("ERROR: Wrapper construction error.\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
+		error_log("ERROR: Wrapper construction error.\n", 3, "/home/veypor/logs/" . $today . ".log");
 		exit();
 	}
 
 	try {
 		$ts3_server = TeamSpeak3::factory("serverquery://$TSUser:$TSPassword@$TSIP");
 	} catch (TeamSpeak3_Exception $e) {
-		error_log("ERROR: Forging TS3 connection. Code: " . $e->getCode() . ": " . $e->getMessage() . "\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
+		error_log("ERROR: Forging TS3 connection. Code: " . $e->getCode() . ": " . $e->getMessage() . "\n", 3, "/home/veypor/logs/" . $today . ".log");
 		exit();
 	}
 
@@ -110,7 +110,7 @@
 			try {
 				$account = $api->account($gw2key)->get();
 			} catch(Exception $e) {
-				error_log("INVALID KEY: User with TSDBID: " . $tsdbid . " has an invalid API key. Triggering deverification procedures. " . $tsdbid . "\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
+				error_log("INVALID KEY: User with TSDBID: " . $tsdbid . " has an invalid API key. Triggering deverification procedures. " . $tsdbid . "\n", 3, "/home/veypor/logs/" . $today . ".log");
 				deverify($row['id'],$tsdbid,$ts3_server,$tablename,$today);
 				$valid = false;
 			}
@@ -119,7 +119,7 @@
 		if ($valid == true) {
 			$world = $account->world;
 			if ($world != BGWID) {
-				error_log("INVALID WORLD: User with TSDBID: " . $tsdbid . " is on unauthorised world " . $world . ". Triggering deverification procedures. " . $tsdbid . "\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
+				error_log("INVALID WORLD: User with TSDBID: " . $tsdbid . " is on unauthorised world " . $world . ". Triggering deverification procedures. " . $tsdbid . "\n", 3, "/home/veypor/logs/" . $today . ".log");
 				deverify($row['id'],$tsdbid,$ts3_server,$tablename,$today);
 				$valid = false;
 			}
@@ -127,6 +127,6 @@
 	}
 
 	$time_elapsed_secs = (microtime(true) - $startTime);
-	error_log("~~~ End BIAS Reverification Log for " . $today . ".\nToday's run took " . $time_elapsed_secs . " seconds to complete.\n", 3, "/home/gw2bla5/scripts/logs/" . $today . ".log");
+	error_log("~~~ End BIAS Reverification Log for " . $today . ".\nToday's run took " . $time_elapsed_secs . " seconds to complete.\n", 3, "/home/veypor/logs/" . $today . ".log");
 
 ?>
