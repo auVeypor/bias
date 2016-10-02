@@ -105,12 +105,13 @@
 		$valid = true;
 		$gw2key = $row['apikey'];
 		$tsdbid = $row['tsdbid'];
+		$tsdname = $row['tsname'];
 
 		if ($valid == true) {
 			try {
 				$account = $api->account($gw2key)->get();
 			} catch(Exception $e) {
-				error_log("INVALID KEY: User with TSDBID: " . $tsdbid . " has an invalid API key. Triggering deverification procedures. " . $tsdbid . "\n", 3, "/home/veypor/logs/" . $today . ".log");
+				error_log("INVALID KEY: User " . $tsdname .  " with TSDBID: " . $tsdbid . " has an invalid API key. Triggering deverification procedures. " . $tsdbid . "\n", 3, "/home/veypor/logs/" . $today . ".log");
 				deverify($row['id'],$tsdbid,$ts3_server,$tablename,$today);
 				$valid = false;
 			}
@@ -119,7 +120,7 @@
 		if ($valid == true) {
 			$world = $account->world;
 			if ($world != BGWID) {
-				error_log("INVALID WORLD: User with TSDBID: " . $tsdbid . " is on unauthorised world " . $world . ". Triggering deverification procedures. " . $tsdbid . "\n", 3, "/home/veypor/logs/" . $today . ".log");
+				error_log("INVALID WORLD: User " . $tsdname .  " with TSDBID: " . $tsdbid . " is on unauthorised world " . $world . ". Triggering deverification procedures. " . $tsdbid . "\n", 3, "/home/veypor/logs/" . $today . ".log");
 				deverify($row['id'],$tsdbid,$ts3_server,$tablename,$today);
 				$valid = false;
 			}
