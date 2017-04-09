@@ -105,6 +105,9 @@
 	} catch(ApiException $e) {
 		error_log("WARNING: ApiException thrown after a Quaggan probe. API server may be offline. BIAS is aborting sentry procedures.", 3, "/home/veypor/logs/" . $today . ".log");
 		exit();
+	} catch(Exception $e) {
+		error_log("WARNING: Generic Exception thrown after a Quaggan probe. API server may be offline. BIAS is aborting sentry procedures.", 3, "/home/veypor/logs/" . $today . ".log");
+		exit();
 	}
 
 	$numChecks = 0;
