@@ -100,6 +100,16 @@
 		exit();
 	}
 
+	try {
+		$riverRats = $api->quaggans()->many(['cheer', 'party']);
+	} catch(ApiException $e) {
+		error_log("WARNING: ApiException thrown after a Quaggan probe. API server may be offline. BIAS is aborting sentry procedures.", 3, "/home/veypor/logs/" . $today . ".log");
+		exit();
+	}
+
+	$numChecks = 0;
+	$numHits = 0;
+
 	while($row = $result->fetch_assoc())
 	{
 		$valid = true;
@@ -110,10 +120,15 @@
 		if ($valid == true) {
 			try {
 				$account = $api->account($gw2key)->get();
-			} catch(Exception $e) {
+			} catch(AuthenticationException $e) {
 				error_log("INVALID KEY: User " . $tsdname .  " with TSDBID: " . $tsdbid . " has an invalid API key. Triggering deverification procedures. " . $tsdbid . "\n", 3, "/home/veypor/logs/" . $today . ".log");
 				deverify($row['id'],$tsdbid,$ts3_server,$tablename,$today);
+				$numHits++;
 				$valid = false;
+			}
+			catch(ApiException $e) {
+				error_log("WARNING: ApiException thrown when accessing account data. API server may be offline. BIAS is aborting sentry procedures.", 3, "/home/veypor/logs/" . $today . ".log");
+				exit();
 			}
 		}
 
@@ -122,12 +137,14 @@
 			if ($world != BGWID) {
 				error_log("INVALID WORLD: User " . $tsdname .  " with TSDBID: " . $tsdbid . " is on unauthorised world " . $world . ". Triggering deverification procedures. " . $tsdbid . "\n", 3, "/home/veypor/logs/" . $today . ".log");
 				deverify($row['id'],$tsdbid,$ts3_server,$tablename,$today);
+				$numHits++;
 				$valid = false;
 			}
 		}
+		$numChecks++;
 	}
 
 	$time_elapsed_secs = (microtime(true) - $startTime);
-	error_log("~~~ End BIAS Reverification Log for " . $today . ".\nToday's run took " . $time_elapsed_secs . " seconds to complete.\n", 3, "/home/veypor/logs/" . $today . ".log");
+	error_log("~~~ End BIAS Reverification Log for " . $today . ".\nToday's run took " . $time_elapsed_secs . " seconds to complete.\n" . $numChecks . " users were scanned and " . $numHits . " were deverified.\n", 3, "/home/veypor/logs/" . $today . ".log");
 
 ?>

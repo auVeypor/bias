@@ -142,6 +142,16 @@ EOT;
 			
 			$result1 = $DBConnection->query($sqlSEARCHACCOUNT);
 			if ($result1->num_rows > 0) {
+
+				$row = $result1->fetch_assoc();
+				$verificationtime = $row['timeverified'];
+				$currtime = time();
+
+				if (($currtime - $verificationtime) > 86164) { //86164 seconds in a day
+					echo "You have verified an identity with BIAS in the last 24 hours. You are limited to one identity per 24 hour period. Please contact a gatekeeper if this is a mistake.<br>";
+					exit();
+				}
+
 				echo "This account has already verified a TS3 identity with the UID:<br>";
 				$row = $result1->fetch_assoc();
 				$oldDBID = $row["tsdbid"];
